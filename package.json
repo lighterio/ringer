@@ -1,0 +1,46 @@
+{
+  "name": "ringer",
+  "description": "ringer is a Zerious module",
+  "keywords": [
+    "ringer"
+  ],
+  "version": "0.0.0",
+  "main": "ringer.js",
+  "homepage": "http://github.com/zerious/ringer",
+  "repository": "http://github.com/zerious/ringer.git",
+  "bugs": {
+    "url": "http://github.com/zerious/ringer/issues"
+  },
+  "author": {
+    "name": "Sam Eubank",
+    "email": "sameubank@gmail.com"
+  },
+  "contributors": {
+    "name": "Sam Eubank",
+    "email": "sameubank@gmail.com"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://github.com/zerious/ringer/blob/master/MIT-LICENSE.md"
+    }
+  ],
+  "engines": [
+    "node >= 0.2.6"
+  ],
+  "scripts": {
+    "test": "mocha",
+    "retest": "mocha --watch",
+    "cover": "istanbul cover _mocha",
+    "report": "open coverage/lcov-report/index.html",
+    "coveralls": "istanbul cover _mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "zeriousify": "0.1.1",
+    "assert-plus": "0.1.5",
+    "mocha": "1.18.2",
+    "istanbul": "0.2.8",
+    "coveralls": "2.10.0"
+  }
+}
