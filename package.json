@@ -8,7 +8,7 @@
   },
   "devDependencies": {
     "zeriousify": "^0.1.10",
-    "exam": "^0.0.7",
+    "exam": "^0.0.8",
     "istanbul": "0.2.8",
     "coveralls": "2.10.0",
     "za": "^0.0.21",
@@ -20,7 +20,12 @@
     "hash",
     "ring",
     "distributed",
+    "data",
+    "cloud",
+    "storage",
+    "cache",
     "cluster",
+    "service",
     "services"
   ],
   "main": "ringer.js",
@@ -35,7 +40,7 @@
   },
   "repository": "https://github.com/lighterio/ringer.git",
   "bugs": "https://github.com/lighterio/ringer/issues",
-  "homepage": "http://github.com/lighterio/ringer",
+  "homepage": "http://lighter.io/ringer",
   "author": "Sam Eubank <sameubank@gmail.com>",
   "contributors": [
     "Sam Eubank <sameubank@gmail.com>"
