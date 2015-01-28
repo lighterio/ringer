@@ -1,19 +1,12 @@
 {
   "name": "ringer",
-  "version": "0.0.0",
-  "description": "Ringer is a hash ring module for distributed Node.js services.",
+  "version": "0.0.1",
+  "description": "Ringer is a distributed host process coordinator",
   "dependencies": {
-    "lru-cache": "^2.5.0",
-    "leveldown": "^1.0.0"
+    "leveldown": "^1.0.1"
   },
   "devDependencies": {
-    "zeriousify": "^0.1.10",
-    "exam": "^0.0.8",
-    "istanbul": "0.2.8",
-    "coveralls": "2.10.0",
-    "za": "^0.0.21",
-    "express": "^4.9.4",
-    "cedar": "^0.0.19"
+    "exam": "^0.2.2"
   },
   "keywords": [
     "ringer",
@@ -34,9 +27,9 @@
   },
   "scripts": {
     "test": "./node_modules/exam/exam.js",
-    "cover": "istanbul cover ./node_modules/exam/exam.js",
+    "cover": "./node_modules/exam/exam-cover.js",
     "report": "open coverage/lcov-report/index.html",
-    "coveralls": "istanbul cover ./node_modules/exam/exam.js --report lcovonly -- -R spec && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage"
+    "coveralls": "./node_modules/exam/exam-coveralls.js"
   },
   "repository": "https://github.com/lighterio/ringer.git",
   "bugs": "https://github.com/lighterio/ringer/issues",

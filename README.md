@@ -7,8 +7,6 @@
 [![Support](https://img.shields.io/gratipay/Lighter.io.svg)](https://gratipay.com/Lighter.io/)
 
 
-## TL;DR
-
 Ringer is a distributed data engine, running within your load-balanced
 Node.js service. It has redundant caching and storage, with hash ring
 orchestration, eventual consistency and latency-optimized routing.
@@ -92,18 +90,12 @@ var ring = require('ringer')({
 ### options.server
 
 Ringer is designed for use with load-balanced web services, and it uses Za
-for its HTTP routing. Hosts behind a load balancer can be discovered using
+for its HTTP routing. Hosts behind a load balancer can be rostered using
 `/ringer/peers`. Additionally, Ringer includes a simple UI for visualizing
 your ring peers and ring data, and it is exposed at `/ringer`.
 
 If `server` is omitted, Ringer will attempt to start a Za server and listen
 on the port specified by `httpPort`.
-
-### options.httpPort
-
-If Ringer starts a Za server due to the `server` option being omitted, it
-makes that server listen on the port specified by `httpPort`. If both
-`server` and `httpPort` are omitted, Ringer starts a server on port 8888.
 
 ### options.processCount
 
@@ -111,14 +103,14 @@ Ringer peers run on multiple hosts, with multiple processes per host (by
 default, one process per CPU). If you want to limit Ringer's process usage,
 you can give a numerical value for `processCount`.
 
-### options.firstPort
+### options.port
 
 Ringer directs traffic to each process using a different port. The ports
 are numbered in order starting with `firstPort`, which defaults to `12300`.
 
 ### options.url
 
-Ringer discovers peers by sending signed requests through a load balancer.
+Ringer rosters peers by sending signed requests through a load balancer.
 In a production environment, `url` should point to the web service's
 external-facing URL, and in a development environment, it can point to the
 default: `"http://localhost:8888/ringer"`.
