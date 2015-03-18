@@ -7,7 +7,7 @@
 [![Support](https://img.shields.io/gratipay/Lighter.io.svg)](https://gratipay.com/Lighter.io/)
 
 
-Ringer is a distributed data engine, running within your load-balanced
+Ringer is a distributed data system, running within your load-balanced
 Node.js service. It has redundant caching and storage, with hash ring
 orchestration, eventual consistency and latency-optimized routing.
 
@@ -16,9 +16,9 @@ orchestration, eventual consistency and latency-optimized routing.
 * Ringer is part of your application. It frees you from installing,
   configuring and connecting to multiple data services.
 
-* Ringer comes with the very stable and popular
-  [lru-cache](https://www.npmjs.org/package/lru-cache) and
-  [leveldown](https://www.npmjs.org/package/leveldown) modules.
+* Ringer uses the very stable and fast LevelDB database via the
+  [leveldown](https://www.npmjs.org/package/leveldown) module for
+  disk persistence.
 
 * Modern web services have features such as load balancing,
   multi-region deployment, process management, monitoring, auto scaling,
@@ -26,12 +26,12 @@ orchestration, eventual consistency and latency-optimized routing.
   it gets your service's operational features for free.
 
 * Ringer is crazy fast, because:
-  * Peers measure read times and use the fastest routes.
-  * Cache and storage use one ring. Cache misses immediately become disk hits.
+  * Peers measure latency and use the fastest routes.
+  * One ring handles caching and storage, so network requests are reduced.
   * In-process objects can be modified without deserialization.
-  * In an `N` host ring with `R` redundancy, `R / N` requests are internal.
-  * Frequently-written data gets local pre-aggregation.
-  * Frequently-read data gets global redundancy.
+  * Requests can route internally because clients can also be peers.
+  * Frequently-written data can be pre-aggregated locally.
+  * Frequently-accessed data can be cached globally.
 
 
 #### Install Ringer
@@ -40,100 +40,79 @@ npm install --save ringer
 ```
 
 #### Use Ringer
-```javascript
+```js
 var server = require('za')().listen(8888);
 
 var ring = require('ringer')({
-  appServer: server
+  hostPattern: 'app-(eu|use|usw|apn)-(1-5).lighter.io'
 });
 
-server.get('/', function (request, response) {
-  var collection = 'user-agent';
-  var key = request.headers[collection];
-  ring.increment(collection, key, function (error, count) {
-    if (error) {
-      response.send('Error: ' + error);
-    } else {
-      response.send(count + ' requests from ' + key);
-    }
+ring.set('foo', 'bar', function (err) {
+  ring.get('foo', function (foo) {
+    process.assert(foo == 'bar');
   });
 });
 ```
 
-
 ## ringer([options])
 
-The `ringer` library outputs a `ring` object on which ring methods are called.
-The ring object is created with several options that govern the ring's
-bootstrapping and behavior.
-
-When called without an options object, Ringer uses defaults:
-```javascript
-var ring = require('ringer')();
-```
-These are the defaults:
-```javascript
-var ring = require('ringer')({
-  server: null,                      // Create a new Za server.
-  httpPort: 8888,                    // Use the default HTTP port.
-  processCount: 0,                   // Use all available cores.
-  firstPort: 12300,
-  url: 'http://localhost:8888/', // Orchestrate localhost.
-  redundancy: 4,                     // Store data in 4 places.
-  latencyExploration: 0.05           // Try a slower host 5% of the time.
-  sortPeers: function (a, b) {        // Sort peers by name.
-    return a.name < b.name ? -1 : 1;
-  }
-});
-```
-
-### options.server
-
-Ringer is designed for use with load-balanced web services, and it uses Za
-for its HTTP routing. Hosts behind a load balancer can be rostered using
-`/ringer/peers`. Additionally, Ringer includes a simple UI for visualizing
-your ring peers and ring data, and it is exposed at `/ringer`.
-
-If `server` is omitted, Ringer will attempt to start a Za server and listen
-on the port specified by `httpPort`.
+The `ringer` library outputs a `ring` object on which ring methods are
+called. A ring object is created with several options that govern the
+ring's bootstrapping and behavior.
 
 ### options.processCount
+The process count specifies the number of CPUs per host, and it defaults
+to using all available CPUs.
 
-Ringer peers run on multiple hosts, with multiple processes per host (by
-default, one process per CPU). If you want to limit Ringer's process usage,
-you can give a numerical value for `processCount`.
+### options.dataLocation
+The database path is where LevelDB data is stored, with a subdirectory for
+each worker. The default path is the **data** directory in the current working
+directory.
 
-### options.port
+### options.replicas
+The replicas setting indicates the number of times to replicate a key-value
+pair around the ring for redundancy. This number includes the main entry as
+well as duplicates, so it must be at least 1, and the default is **5**.
 
-Ringer directs traffic to each process using a different port. The ports
-are numbered in order starting with `firstPort`, which defaults to `12300`.
+### options.cacheSize
+The cache size indicates the number of items to keep in LRU cache, with the
+default being **10,000**.
 
-### options.url
+### options.basePort
+The base port is the first port on which processes will listen, with each
+subsequent process incrementing that number by 1. The default is 12300. So
+if a host has 4 processes and uses the default `basePort`, it will listen
+on ports 12300, 12301, 12302 and 12303.
 
-Ringer rosters peers by sending signed requests through a load balancer.
-In a production environment, `url` should point to the web service's
-external-facing URL, and in a development environment, it can point to the
-default: `"http://localhost:8888/ringer"`.
+### options.hostPattern
+The host pattern is used to bootstrap the host discovery process. It defaults
+to the current hostname, so it must be set in order to allow multiple hosts
+to interact.
 
-### options.redundancy
+The pattern supports parenthetical expressions which can be pipe-delimited
+lists or a start and end number for a sequence. So if you had 10 hosts
+across 2 US locales, your host pattern might look like:
+`"ringer-us(east|west)-(1-5).domain.tld"`.
 
-Each piece of data can be stored in a specified number of places for
-redundancy. Low redundancy decreases reliability in the case of host
-failures and datacenter outages. High redundancy uses more memory and disk
-(as well as network and CPU, to a lesser extent).
+### options.isClientOnly (Default: false
+If the current process needs to access the ring, but will not store data
+as a peer, it should set `isClientOnly` to true. The default is **false**.
 
-### options.latencyExploration
 
-Peers keep track of the average latency to every other peer. Latency
-exploration is the percentage of queries for which a host will request data
-from a slower host in addition to the fastest host and use the first result
-that arrives. The default is `0.05`, meaning 5% exploration.
+### options.discoverDelay (Default: 1e3
+The discover delay is the number of milliseconds a peer waits between
+attempts to discover all peers. The default is **1,000** (one second).
 
-### options.sortPeers
 
-The topology of the ring is represented by an array of peers, sorted
-with a custom sort function. By default, peers are sorted by name, which
-is of the form `"host:port"`.
+### options.heartbeatDelay
+The heartbeat delay is the number of milliseconds between heartbeat
+requests which ping a random peer in order to measure latency. The default
+is **100** milliseconds.
+
+### options.log
+Ringer can use a custom log. The default is **console**.
+
+
 
 
 ## ring
@@ -148,12 +127,9 @@ We would like to thank all of the amazing people who use, support,
 promote, enhance, document, patch, and submit comments & issues.
 Ringer couldn't exist without you.
 
-We depend on [lru-cache](https://www.npmjs.org/package/lru-cache),
-[leveldown](https://www.npmjs.org/package/leveldown) and
-[xxhash](https://www.npmjs.org/package/xxhash), so thanks are due to
-[Isaac Schlueter](https://github.com/isaacs),
-[Rod Vagg](https://github.com/rvagg),
-[C J Silverio](https://github.com/ceejbot), and all of their contributors.
+We depend on [leveldown](https://www.npmjs.org/package/leveldown), so
+thanks are due to [Rod Vagg](https://github.com/rvagg), and everyone
+who contributes to LevelDB and related modules.
 
 Additionally, huge thanks go to [TUNE](http://www.tune.com) for employing
 and supporting [Ringer](http://lighter.io/ringer) project maintainers,

@@ -24,8 +24,8 @@
     app.get('/ringer/frames', function (request, response) {
       response.setHeader('content-type', 'text/html');
       var html = '<title>Ringer</title>';
-      for (var i = 0; i < self.config.processCount; i++) {
-        var port = app.config.httpPort + i;
+      for (var i = 0; i < self.processCount; i++) {
+        var port = app.httpPort + i;
         html += '<iframe src="http://localhost:' + port + '/ringer/roster" style="width:100%"></iframe><br>';
       }
       response.send(html);

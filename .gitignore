@@ -9,9 +9,12 @@
 .project
 .DS_Store
 .cache
+.jshintrc
+.editorconfig
 pids
 logs
 results
 coverage
 node_modules
 build
+hash.js

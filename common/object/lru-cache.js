@@ -1,17 +1,21 @@
 /**
  * Fast LRU Cache, implemented with a doubly-linked loop.
  *
- * @origin /Users/sam/Workspace/ringer/common/object/lru-cache.js
- * @version 0.0.1
+ * @origin https://github.com/lighterio/lighter-common/common/object/lru-cache.js
+ * @version 0.0.2
+ * @import object/type
  */
 
 var Type = require('./type');
-var LruCache = module.exports = Type.extend({
+module.exports = Type.extend({
 
   /**
    * Create a Cache object based on options.
    */
   init: function (options) {
+    if (typeof options == 'number') {
+      options = {maxSize: options};
+    }
     options = options || {};
     this.maxSize = options.maxSize || 1e4;
     this.clear();
@@ -172,7 +176,7 @@ function Item(key, value) {
   this.value = value;
   this._prev = null;
   this._next = null;
-};
+}
 
 Item.prototype = {
 

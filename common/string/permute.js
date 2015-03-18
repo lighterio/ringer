@@ -3,7 +3,7 @@
  *  - The string "(a|b|c)" would return ["a", "b", "c"].
  *  - The string "(1-3)" would return ["1", "2", "3"].
  *
- * @origin lighter-common/common/string/permute.js
+ * @origin https://github.com/lighterio/lighter-common/common/string/permute.js
  * @version 0.0.1
  */
 
