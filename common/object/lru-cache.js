@@ -17,7 +17,7 @@ module.exports = Type.extend({
       options = {maxSize: options};
     }
     options = options || {};
-    this.maxSize = options.maxSize || 1e4;
+    this.maxSize = options.maxSize || 1e6;
     this.clear();
   },
 
