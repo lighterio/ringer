@@ -1,6 +1,6 @@
 {
   "name": "ringer",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Ringer is a distributed host process coordinator",
   "dependencies": {
     "leveldown": "^1.0.1"
